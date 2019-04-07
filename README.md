@@ -12,4 +12,6 @@
 
 5) make alias in you bashrc ` echo "alias k8s_select='.  profilek8s' " >> ~/.bashrc`
 
-reopen bash or invoke new bash with 'bash' in terminal 
+reopen bash or invoke new bash with 'bash' in terminal
+
+usage:  `k8s_select profile_name`  
