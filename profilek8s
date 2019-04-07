@@ -17,10 +17,12 @@ unset CLUSTER_TYPE;
 
 
 input_profile=${1}
+unset ${input_profile}[]
 
 while read line; do 
-    if [[ $line =~ ^"["(.+)"]"$ ]]; then 
+    if [[ $line =~ ^"["(.+)"]"$ ]]; then
         arrname=${BASH_REMATCH[1]}
+	unset $arrname
         declare -A $arrname
     elif [[ $line =~ ^([_[:alpha:]][_[:alnum:]]*)"="(.*) ]]; then 
         declare ${arrname}[${BASH_REMATCH[1]}]="${BASH_REMATCH[2]}"
@@ -70,7 +72,7 @@ function select_cluster {
 }
 
 
-
+unset varAlias[];
 eval varAlias=( '"${!'${input_profile}'[@]}"' )
  if [ -z "$varAlias" ]; then 
 	 echo no such profile please edit ${CONF_PATH}
