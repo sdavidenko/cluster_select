@@ -5,6 +5,10 @@ CONF_DIR=~/.profilek8s
 CONF_FILE=config.conf
 CONF_PATH=${CONF_DIR}/${CONF_FILE}
 
+unset AWS_PROFILE;
+unset CLUSTER_NAME;
+unset STATE_BUCKET;
+unset CLUSTER_TYPE;
 
  if [ -z "$1" ]; then
          echo no profile selected, expect profile name in config.conf
@@ -34,20 +38,20 @@ case $1 in
           select_cluster $1 $2  
           ;;
      STATE_BUCKET)
-          export $1=$2
+          export $1="$2"
 	  ;;
      CLUSTER_TYPE)
-	  export ${1^^}=${2^^}
+	  export ${1^^}="${2^^}"
           ;; 
      *)
-          echo "пока в работе пни @Serda в слаке "
+          echo "пока в работе "
           ;;
 esac
 
 }
 
 function export_profile {
-  export  AWS_PROFILE=${1}
+  export  AWS_PROFILE="${1}"
   
 }
 
