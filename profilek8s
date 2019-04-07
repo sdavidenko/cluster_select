@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+
+CONF_DIR=~/.profilek8s
+CONF_FILE=config.conf
+CONF_PATH=${CONF_DIR}/${CONF_FILE}
+
+
+ if [ -z "$1" ]; then
+         echo no profile selected, expect profile name in config.conf
+         return
+ fi
+
+
+input_profile=${1}
+
+while read line; do 
+    if [[ $line =~ ^"["(.+)"]"$ ]]; then 
+        arrname=${BASH_REMATCH[1]}
+        declare -A $arrname
+    elif [[ $line =~ ^([_[:alpha:]][_[:alnum:]]*)"="(.*) ]]; then 
+        declare ${arrname}[${BASH_REMATCH[1]}]="${BASH_REMATCH[2]}"
+    fi
+done < ${CONF_PATH}
+
+
+
+function main {
+case $1 in
+     AWS_PROFILE)
+          export_profile $2 
+          ;;
+     CLUSTER_NAME)
+          select_cluster $1 $2  
+          ;;
+     STATE_BUCKET)
+          export $1=$2
+	  ;;
+     CLUSTER_TYPE)
+	  export ${1^^}=${2^^}
+          ;; 
+     *)
+          echo "пока в работе пни @Serda в слаке "
+          ;;
+esac
+
+}
+
+function export_profile {
+  export  AWS_PROFILE=${1}
+  
+}
+
+function select_cluster {
+  if [[ ${CLUSTER_TYPE} == "EKS" ]]; then
+        aws eks update-kubeconfig --name ${2}
+  elif [[ ${CLUSTER_TYPE} == "KOPS" ]]; then 
+	 if [ -z "${STATE_BUCKET}" ]; then
+		 echo "not state (STATE_BUCKET) for KOPS in" $input_profile " profile" 
+         return
+         else
+ 	 kops export kubecfg --name ${2} --state ${STATE_BUCKET} 
+         fi
+  else echo $CLUSTER_TYPE not supported
+  fi 
+}
+
+
+
+eval varAlias=( '"${!'${input_profile}'[@]}"' )
+ if [ -z "$varAlias" ]; then 
+	 echo no such profile please edit ${CONF_PATH}
+	 return
+ fi
+
+echo "#############################################################"
+echo "profile name :" $input_profile
+for i in ${varAlias[@]};  do
+    cmd='echo ${'${input_profile}'['$i']}'
+    echo $i = $( eval ${cmd} )
+done 
+echo "#############################################################" 
+
+for i in ${varAlias[@]};  do
+   cmd='echo ${'${input_profile}'['$i']}'
+   main $i $(eval ${cmd});
+  done
+
+
+
